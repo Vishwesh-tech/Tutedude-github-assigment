@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Wellnest</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#57B5E7',
+                        secondary: '#8DD3C7'
+                    },
+                    borderRadius: {
+                        'none': '0px',
+                        'sm': '4px',
+                        DEFAULT: '8px',
+                        'md': '12px',
+                        'lg': '16px',
+                        'xl': '20px',
+                        '2xl': '24px',
+                        '3xl': '32px',
+                        'full': '9999px',
+                        'button': '8px'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+    <style>
+        :where([class^="ri-"])::before {
+            content: "\f3c2";
+        }
+        .user-dropdown {
+            display: none;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.2s ease-in-out;
+            z-index: 50;
+        }
+
+        .user-dropdown.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .sidebar-collapsed {
+            width: 4rem;
+        }
+        .sidebar-expanded {
+            width: 16rem;
+        }
+        .custom-toggle {
+            width: 3rem;
+            height: 1.5rem;
+            background: #e5e7eb;
+            border-radius: 9999px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .custom-toggle.active {
+            background: #57B5E7;
+        }
+        .custom-toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 1.25rem;
+            height: 1.25rem;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+        .custom-toggle.active::after {
+            transform: translateX(1.5rem);
+        }
+        .custom-radio {
+            appearance: none;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 50%;
+            width: 1.25rem;
+            height: 1.25rem;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .custom-radio:checked {
+            background: #57B5E7;
+            border-color: #57B5E7;
+        }
+        .custom-radio:checked::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0.5rem;
+            height: 0.5rem;
+            background: white;
+            border-radius: 50%;
+        }
+        .custom-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+        .settings-section {
+            transition: all 0.2s ease;
+        }
+        .settings-section:hover {
+            background: #f9fafb;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="flex h-screen">
+        <div id="sidebar" class="sidebar-expanded bg-white shadow-lg transition-all duration-300 ease-in-out flex flex-col">
+            <div class="p-6 border-b border-gray-100">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="ri-heart-pulse-line text-white text-lg"></i>
+                    </div>
+                    <span class="font-['Pacifico'] text-xl text-gray-800 sidebar-text">Wellnest</span>
+                </div>
+            </div>
+            
+            <nav class="flex-1 p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="{{ url_for('dashboard') }}" data-readdy="true" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="ri-dashboard-line"></i>
+                            </div>
+                            <span class="sidebar-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('habits') }}" data-readdy="true" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="ri-checkbox-circle-line"></i>
+                            </div>
+                            <span class="sidebar-text">Habits</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('moodtracker') }}"
+                            class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="ri-emotion-line"></i>
+                            </div>
+                            <span class="sidebar-text">Mood Tracker</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('ai_coach') }}" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="ri-robot-line"></i>
+                            </div>
+                            <span class="sidebar-text">AI Coach</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('achievement') }}" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="ri-trophy-line"></i>
+                            </div>
+                            <span class="sidebar-text">Achievements</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('setting') }}" class="nav-item active flex items-center space-x-3 px-4 py-3 rounded-lg bg-primary text-white">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="ri-settings-line"></i>
+                            </div>
+                            <span class="sidebar-text">Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="p-4 border-t border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div class="custom-toggle" id="darkModeToggle"></div>
+                    <span class="text-sm text-gray-600 sidebar-text">Dark Mode</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white border-b border-gray-100 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <button id="sidebarToggle" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-50">
+                            <i class="ri-menu-line text-gray-600"></i>
+                        </button>
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Settings</h1>
+                            <p class="text-gray-600">Customize your Wellnest experience</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-4">
+                            <button
+                                class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-50 relative">
+                                <i class="ri-notification-line text-gray-600"></i>
+                                <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+                            </button>
+                            <div class="relative">
+                                <button id="userMenuButton"
+                                    class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-semibold hover:bg-primary/90 transition-colors">
+                                    {{ initial }}
+                                </button>
+                                <!-- Dropdown Menu -->
+                                <div id="userDropdown"
+                                    class="user-dropdown absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1">
+                                    <div class="px-4 py-2 border-b border-gray-100">
+                                        <p class="text-sm font-medium text-gray-900">{{ user_name }}</p>
+                                        <p class="text-xs text-gray-500">{{ user_email }}</p>
+                                    </div>
+                                    <a href="{{ url_for('dashboard') }}"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                        <i class="ri-dashboard-line mr-2"></i>Dashboard
+                                    </a>
+                                    <a href="{{ url_for('setting') }}"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                        <i class="ri-settings-line mr-2"></i>Settings
+                                    </a>
+                                    <hr class="my-1">
+                                    <a href="{{ url_for('logout') }}"
+                                        class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                        <i class="ri-logout-box-line mr-2"></i>Sign Out
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-6">
+                <div class="max-w-4xl mx-auto space-y-8">
+                    <div class="bg-white rounded-2xl shadow-sm">
+                        <div class="p-6 border-b border-gray-100">
+                            <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                                <div class="w-6 h-6 flex items-center justify-center mr-3">
+                                    <i class="ri-user-line text-primary"></i>
+                                </div>
+                                Profile
+                            </h2>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-center space-x-6 mb-6">
+                                <div class="relative">
+                                    <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center">
+                                        <span class="text-white text-2xl font-semibold">{{ initial }}</span>
+                                    </div>
+                                    <button class="absolute -bottom-1 -right-1 w-8 h-8 bg-white border-2 border-gray-200 rounded-full flex items-center justify-center hover:bg-gray-50">
+                                        <i class="ri-camera-line text-gray-600 text-sm"></i>
+                                    </button>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-gray-800">{{ user_name }}</h3>
+                                    <p class="text-gray-600">{{ user_email }}</p>
+                                    <p class="text-sm text-gray-500">Member since January 2024</p>
+                                </div>
+                                <button class="px-4 py-2 bg-primary text-white rounded-button !rounded-button whitespace-nowrap hover:bg-blue-600">
+                                    Edit Profile
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                                    <input type="text" value="Sarah Mitchell" class="w-full px-4 py-3 border border-gray-200 rounded-button text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                    <input type="email" value="sarah.mitchell@email.com" class="w-full px-4 py-3 border border-gray-200 rounded-button text-sm">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm">
+                        <div class="p-6 border-b border-gray-100">
+                            <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                                <div class="w-6 h-6 flex items-center justify-center mr-3">
+                                    <i class="ri-palette-line text-primary"></i>
+                                </div>
+                                Appearance & Preferences
+                            </h2>
+                        </div>
+                        <div class="p-6 space-y-6">
+                            <div class="settings-section p-4 rounded-lg border border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-800">Theme</h3>
+                                        <p class="text-sm text-gray-600">Choose your preferred theme</p>
+                                    </div>
+                                    <div class="flex space-x-4">
+                                        <label class="flex items-center space-x-2 cursor-pointer">
+                                            <input type="radio" name="theme" value="light" class="custom-radio" checked>
+                                            <span class="text-sm text-gray-700">Light</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2 cursor-pointer">
+                                            <input type="radio" name="theme" value="dark" class="custom-radio">
+                                            <span class="text-sm text-gray-700">Dark</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2 cursor-pointer">
+                                            <input type="radio" name="theme" value="auto" class="custom-radio">
+                                            <span class="text-sm text-gray-700">Auto</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="settings-section p-4 rounded-lg border border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-800">Language</h3>
+                                        <p class="text-sm text-gray-600">Select your preferred language</p>
+                                    </div>
+                                    <select class="custom-select px-4 py-2 border border-gray-200 rounded-button text-sm w-40">
+                                        <option value="en">English</option>
+                                        <option value="es">Spanish</option>
+                                        <option value="fr">French</option>
+                                        <option value="de">German</option>
+                                        <option value="zh">Chinese</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="settings-section p-4 rounded-lg border border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-800">Time Zone</h3>
+                                        <p class="text-sm text-gray-600">Set your local time zone</p>
+                                    </div>
+                                    <select class="custom-select px-4 py-2 border border-gray-200 rounded-button text-sm w-48">
+                                        <option value="UTC-8">Pacific Time (UTC-8)</option>
+                                        <option value="UTC-7">Mountain Time (UTC-7)</option>
+                                        <option value="UTC-6">Central Time (UTC-6)</option>
+                                        <option value="UTC-5" selected>Eastern Time (UTC-5)</option>
+                                        <option value="UTC+0">GMT (UTC+0)</option>
+                                        <option value="UTC+1">Central European Time (UTC+1)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm">
+                        <div class="p-6 border-b border-gray-100">
+                            <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                                <div class="w-6 h-6 flex items-center justify-center mr-3">
+                                    <i class="ri-notification-line text-primary"></i>
+                                </div>
+                                Notifications
+                            </h2>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="settings-section p-4 rounded-lg border border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-800">Push Notifications</h3>
+                                        <p class="text-sm text-gray-600">Receive notifications on your device</p>
+                                    </div>
+                                    <div class="custom-toggle active" data-setting="push-notifications"></div>
+                                </div>
+                            </div>
+
+                            <div class="settings-section p-4 rounded-lg border border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-800">Email Notifications</h3>
+                                        <p class="text-sm text-gray-600">Get updates via email</p>
+                                    </div>
+                                    <div class="custom-toggle active" data-setting="email-notifications"></div>
+                                </div>
+                            </div>
+
+                            <div class="settings-section p-4 rounded-lg border border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-800">Habit Reminders</h3>
+                                        <p class="text-sm text-gray-600">Daily reminders for your habits</p>
+                                    </div>
+                                    <div class="custom-toggle active" data-setting="habit-reminders"></div>
+                                </div>
+                            </div>
+
+                            <div class="settings-section p-4 rounded-lg border border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-800">Weekly Reports</h3>
+                                        <p class="text-sm text-gray-600">Weekly progress summaries</p>
+                                    </div>
+                                    <div class="custom-toggle active" data-setting="weekly-reports"></div>
+                                </div>
+                            </div>
+
+                            <div class="settings-section p-4 rounded-lg border border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-800">Achievement Alerts</h3>
+                                        <p class="text-sm text-gray-600">Celebrate your milestones</p>
+                                    </div>
+                                    <div class="custom-toggle active" data-setting="achievement-alerts"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm">
+                        <div class="p-6 border-b border-gray-100">
+                            <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                                <div class="w-6 h-6 flex items-center justify-center mr-3">
+                                    <i class="ri-checkbox-circle-line text-primary"></i>
+                                </div>
+                                Habit Tracking Preferences
+                            </h2>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="settings-section p-4 rounded-lg border border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-800">Default Reminder Time</h3>
+                                        <p class="text-sm text-gray-600">Default time for new habit reminders</p>
+                                    </div>
+                                    <input type="time" value="09:00" class="px-4 py-2 border border-gray-200 rounded-button text-sm">
+                                </div>
+                            </div>
+
+                            <div class="settings-section p-4 rounded-lg border border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-800">Week Start Day</h3>
+                                        <p class="text-sm text-gray-600">First day of your week</p>
+                                    </div>
+                                    <select class="custom-select px-4 py-2 border border-gray-200 rounded-button text-sm w-32">
+                                        <option value="monday" selected>Monday</option>
+                                        <option value="sunday">Sunday</option>
+                                        <option value="saturday">Saturday</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="settings-section p-4 rounded-lg border border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-800">Progress Calculation</h3>
+                                        <p class="text-sm text-gray-600">How to calculate completion rates</p>
+                                    </div>
+                                    <select class="custom-select px-4 py-2 border border-gray-200 rounded-button text-sm w-40">
+                                        <option value="weekly" selected>Weekly</option>
+                                        <option value="monthly">Monthly</option>
+                                        <option value="all-time">All Time</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="settings-section p-4 rounded-lg border border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-800">Auto-Archive Completed</h3>
+                                        <p class="text-sm text-gray-600">Automatically archive completed habits</p>
+                                    </div>
+                                    <div class="custom-toggle" data-setting="auto-archive"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm">
+                        <div class="p-6 border-b border-gray-100">
+                            <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                                <div class="w-6 h-6 flex items-center justify-center mr-3">
+                                    <i class="ri-database-line text-primary"></i>
+                                </div>
+                                Data Management
+                            </h2>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="settings-section p-4 rounded-lg border border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-800">Export Data</h3>
+                                        <p class="text-sm text-gray-600">Download your habit data</p>
+                                    </div>
+                                    <button class="px-4 py-2 border border-gray-200 rounded-button !rounded-button whitespace-nowrap text-gray-700 hover:bg-gray-50 flex items-center space-x-2">
+                                        <i class="ri-download-line"></i>
+                                        <span>Export</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="settings-section p-4 rounded-lg border border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-800">Import Data</h3>
+                                        <p class="text-sm text-gray-600">Import habits from another app</p>
+                                    </div>
+                                    <button class="px-4 py-2 border border-gray-200 rounded-button !rounded-button whitespace-nowrap text-gray-700 hover:bg-gray-50 flex items-center space-x-2">
+                                        <i class="ri-upload-line"></i>
+                                        <span>Import</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="settings-section p-4 rounded-lg border border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-800">Automatic Backup</h3>
+                                        <p class="text-sm text-gray-600">Backup your data automatically</p>
+                                    </div>
+                                    <div class="custom-toggle active" data-setting="auto-backup"></div>
+                                </div>
+                            </div>
+
+                            <div class="settings-section p-4 rounded-lg border border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-800">Data Retention</h3>
+                                        <p class="text-sm text-gray-600">How long to keep your data</p>
+                                    </div>
+                                    <select class="custom-select px-4 py-2 border border-gray-200 rounded-button text-sm w-32">
+                                        <option value="1year">1 Year</option>
+                                        <option value="2years" selected>2 Years</option>
+                                        <option value="5years">5 Years</option>
+                                        <option value="forever">Forever</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm">
+                        <div class="p-6 border-b border-gray-100">
+                            <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                                <div class="w-6 h-6 flex items-center justify-center mr-3">
+                                    <i class="ri-shield-line text-primary"></i>
+                                </div>
+                                Privacy & Security
+                            </h2>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="settings-section p-4 rounded-lg border border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-800">Profile Visibility</h3>
+                                        <p class="text-sm text-gray-600">Who can see your profile</p>
+                                    </div>
+                                    <select class="custom-select px-4 py-2 border border-gray-200 rounded-button text-sm w-32">
+                                        <option value="private" selected>Private</option>
+                                        <option value="friends">Friends</option>
+                                        <option value="public">Public</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="settings-section p-4 rounded-lg border border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-800">Data Analytics</h3>
+                                        <p class="text-sm text-gray-600">Help improve our service with usage data</p>
+                                    </div>
+                                    <div class="custom-toggle active" data-setting="analytics"></div>
+                                </div>
+                            </div>
+
+                            <div class="settings-section p-4 rounded-lg border border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-800">Two-Factor Authentication</h3>
+                                        <p class="text-sm text-gray-600">Add extra security to your account</p>
+                                    </div>
+                                    <button class="px-4 py-2 border border-gray-200 rounded-button !rounded-button whitespace-nowrap text-gray-700 hover:bg-gray-50">
+                                        Enable
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="settings-section p-4 rounded-lg border border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-800">Connected Accounts</h3>
+                                        <p class="text-sm text-gray-600">Manage linked social accounts</p>
+                                    </div>
+                                    <button class="px-4 py-2 border border-gray-200 rounded-button !rounded-button whitespace-nowrap text-gray-700 hover:bg-gray-50 flex items-center space-x-2">
+                                        <i class="ri-link-line"></i>
+                                        <span>Manage</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm">
+                        <div class="p-6 border-b border-gray-100">
+                            <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                                <div class="w-6 h-6 flex items-center justify-center mr-3">
+                                    <i class="ri-user-settings-line text-primary"></i>
+                                </div>
+                                Account Management
+                            </h2>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="settings-section p-4 rounded-lg border border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-800">Account Status</h3>
+                                        <p class="text-sm text-gray-600">Your account is active</p>
+                                    </div>
+                                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">Active</span>
+                                </div>
+                            </div>
+
+                            <div class="settings-section p-4 rounded-lg border border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-800">Subscription</h3>
+                                        <p class="text-sm text-gray-600">Premium Plan - Expires March 15, 2025</p>
+                                    </div>
+                                    <button class="px-4 py-2 border border-gray-200 rounded-button !rounded-button whitespace-nowrap text-gray-700 hover:bg-gray-50">
+                                        Manage
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="settings-section p-4 rounded-lg border border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-800">Change Password</h3>
+                                        <p class="text-sm text-gray-600">Update your account password</p>
+                                    </div>
+                                    <button class="px-4 py-2 border border-gray-200 rounded-button !rounded-button whitespace-nowrap text-gray-700 hover:bg-gray-50">
+                                        Change
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="settings-section p-4 rounded-lg border border-red-200 bg-red-50">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-red-800">Delete Account</h3>
+                                        <p class="text-sm text-red-600">Permanently delete your account and data</p>
+                                    </div>
+                                    <button class="px-4 py-2 bg-red-600 text-white rounded-button !rounded-button whitespace-nowrap hover:bg-red-700" id="deleteAccountBtn">
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="pt-4 border-t border-gray-100">
+                                <button class="w-full px-6 py-3 border border-gray-200 rounded-button !rounded-button whitespace-nowrap text-gray-700 hover:bg-gray-50 flex items-center justify-center space-x-2">
+                                    <i class="ri-logout-box-line"></i>
+                                    <span>Sign Out</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="deleteAccountModal" class="modal">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="ri-error-warning-line text-red-600 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">Delete Account</h3>
+                <p class="text-gray-600">This action cannot be undone. All your data will be permanently deleted.</p>
+            </div>
+            <div class="flex space-x-4">
+                <button id="cancelDelete" class="flex-1 px-6 py-3 border border-gray-200 rounded-button !rounded-button whitespace-nowrap text-gray-700 hover:bg-gray-50">
+                    Cancel
+                </button>
+                <button id="confirmDelete" class="flex-1 px-6 py-3 bg-red-600 text-white rounded-button !rounded-button whitespace-nowrap hover:bg-red-700">
+                    Delete Account
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script id="sidebarToggle">
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarTexts = document.querySelectorAll('.sidebar-text');
+            
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('sidebar-collapsed');
+                sidebar.classList.toggle('sidebar-expanded');
+                
+                sidebarTexts.forEach(text => {
+                    text.style.display = sidebar.classList.contains('sidebar-collapsed') ? 'none' : 'block';
+                });
+            });
+        });
+    </script>
+
+    <script id="darkModeToggle">
+        document.addEventListener('DOMContentLoaded', function() {
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            
+            darkModeToggle.addEventListener('click', function() {
+                darkModeToggle.classList.toggle('active');
+            });
+        });
+    </script>
+
+    <script id="settingsToggles">
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggles = document.querySelectorAll('.custom-toggle[data-setting]');
+            
+            toggles.forEach(toggle => {
+                toggle.addEventListener('click', function() {
+                    toggle.classList.toggle('active');
+                });
+            });
+        });
+    </script>
+
+    <script id="deleteAccountModal">
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+            const deleteAccountModal = document.getElementById('deleteAccountModal');
+            const cancelDelete = document.getElementById('cancelDelete');
+            const confirmDelete = document.getElementById('confirmDelete');
+            
+            deleteAccountBtn.addEventListener('click', function() {
+                deleteAccountModal.classList.add('active');
+            });
+            
+            cancelDelete.addEventListener('click', function() {
+                deleteAccountModal.classList.remove('active');
+            });
+            
+            confirmDelete.addEventListener('click', function() {
+                deleteAccountModal.classList.remove('active');
+                alert('Account deletion process initiated. You will receive a confirmation email.');
+            });
+            
+            deleteAccountModal.addEventListener('click', function(e) {
+                if (e.target === deleteAccountModal) {
+                    deleteAccountModal.classList.remove('active');
+                }
+            });
+        });
+    </script>
+    <script id="user-dropdown-functionality">
+        document.addEventListener('DOMContentLoaded', function () {
+            const userMenuButton = document.getElementById('userMenuButton');
+            const userDropdown = document.getElementById('userDropdown');
+            
+            if (userMenuButton && userDropdown) {
+                userMenuButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('show');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!userMenuButton.contains(e.target) && !userDropdown.contains(e.target)) {
+                        userDropdown.classList.remove('show');
+                    }
+                });
+
+                // Close dropdown when pressing Escape
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        userDropdown.classList.remove('show');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wellnest - Personal Habit Tracker & AI Wellness Coach</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#57B5E7',
+                        secondary: '#8DD3C7'
+                    },
+                    borderRadius: {
+                        'none': '0px',
+                        'sm': '4px',
+                        DEFAULT: '8px',
+                        'md': '12px',
+                        'lg': '16px',
+                        'xl': '20px',
+                        '2xl': '24px',
+                        '3xl': '32px',
+                        'full': '9999px',
+                        'button': '8px'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+    <style>
+        :where([class^="ri-"])::before {
+            content: "\f3c2";
+        }
+
+        .habit-ring {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring {
+            transition: stroke-dashoffset 0.5s ease-in-out;
+        }
+
+        .habit-card:hover {
+            transform: translateY(-2px);
+            transition: transform 0.2s ease;
+        }
+
+        .mood-emoji {
+            transition: transform 0.2s ease;
+        }
+
+        .mood-emoji:hover {
+            transform: scale(1.2);
+        }
+
+        .streak-flame {
+            animation: flicker 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes flicker {
+            0% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.7;
+            }
+        }
+
+        .sidebar-collapsed {
+            width: 4rem;
+        }
+
+        .sidebar-expanded {
+            width: 16rem;
+        }
+
+        .custom-checkbox {
+            appearance: none;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            width: 1.25rem;
+            height: 1.25rem;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .custom-checkbox:checked {
+            background: #57B5E7;
+            border-color: #57B5E7;
+        }
+
+        .custom-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .custom-toggle {
+            width: 3rem;
+            height: 1.5rem;
+            background: #e5e7eb;
+            border-radius: 9999px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .custom-toggle.active {
+            background: #57B5E7;
+        }
+
+        .custom-toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 1.25rem;
+            height: 1.25rem;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .custom-toggle.active::after {
+            transform: translateX(1.5rem);
+        }
+
+        .ai-message {
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* User Dropdown Styles */
+        .user-dropdown {
+            display: none;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.2s ease-in-out;
+            z-index: 50;
+        }
+
+        .user-dropdown.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div id="sidebar"
+            class="sidebar-expanded bg-white shadow-lg transition-all duration-300 ease-in-out flex flex-col">
+            <div class="p-6 border-b border-gray-100">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="ri-heart-pulse-line text-white text-lg"></i>
+                    </div>
+                    <span class="font-['Pacifico'] text-xl text-gray-800 sidebar-text">Wellnest</span>
+                </div>
+            </div>
+            <nav class="flex-1 p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="{{ url_for('dashboard') }}"
+                            class="nav-item active flex items-center space-x-3 px-4 py-3 rounded-lg bg-primary text-white">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="ri-dashboard-line"></i>
+                            </div>
+                            <span class="sidebar-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('habits') }}"
+                            class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="ri-checkbox-circle-line"></i>
+                            </div>
+                            <span class="sidebar-text">Habits</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('moodtracker') }}"
+                            class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="ri-emotion-line"></i>
+                            </div>
+                            <span class="sidebar-text">Mood Tracker</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('ai_coach') }}"
+                            class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="ri-robot-line"></i>
+                            </div>
+                            <span class="sidebar-text">AI Coach</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('achievement') }}"
+                            class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="ri-trophy-line"></i>
+                            </div>
+                            <span class="sidebar-text">Achievements</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('setting') }}"
+                            class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="ri-settings-line"></i>
+                            </div>
+                            <span class="sidebar-text">Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="p-4 border-t border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div class="custom-toggle" id="darkModeToggle"></div>
+                    <span class="text-sm text-gray-600 sidebar-text">Dark Mode</span>
+                </div>
+            </div>
+        </div>
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white border-b border-gray-100 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <button id="sidebarToggle"
+                            class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-50">
+                            <i class="ri-menu-line text-gray-600"></i>
+                        </button>
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Good morning, {{ user_name }}</h1>
+                            <p class="text-gray-600">Thursday, July 17, 2025</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-50 relative">
+                            <i class="ri-notification-line text-gray-600"></i>
+                            <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+                        </button>
+                        <div class="relative">
+                        <button 
+                            id="userMenuButton"
+                            class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-semibold hover:bg-primary/90 transition-colors">
+                            {{ initial }}
+                        </button>
+                        <!-- Dropdown Menu -->
+                        <div id="userDropdown" class="user-dropdown absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1">
+                            <div class="px-4 py-2 border-b border-gray-100">
+                                <p class="text-sm font-medium text-gray-900">{{ user_name }}</p>
+                                <p class="text-xs text-gray-500">{{ user_email }}</p>
+                            </div>
+                            <a href="{{ url_for('dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="ri-dashboard-line mr-2"></i>Dashboard
+                            </a>
+                            <a href="{{ url_for('setting') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="ri-settings-line mr-2"></i>Settings
+                            </a>
+                            <hr class="my-1">
+                            <a href="{{ url_for('logout') }}" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                <i class="ri-logout-box-line mr-2"></i>Sign Out
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <!-- Main Dashboard Content -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <div class="max-w-7xl mx-auto">
+                    <!-- Progress Overview -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-white rounded-2xl p-6 shadow-sm">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold text-gray-800">Today's Progress</h3>
+                                <div class="streak-flame">
+                                    <i class="ri-fire-line text-orange-500 text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-center mb-4">
+                                <div class="relative w-24 h-24">
+                                    <svg class="w-24 h-24 habit-ring">
+                                        <circle cx="48" cy="48" r="40" stroke="#e5e7eb" stroke-width="8" fill="none" />
+                                        <circle cx="48" cy="48" r="40" stroke="#57B5E7" stroke-width="8" fill="none"
+                                            stroke-dasharray="251.2" stroke-dashoffset="75.36" class="progress-ring" />
+                                    </svg>
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <span class="text-2xl font-bold text-gray-800">70%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-center text-gray-600">5 of 7 habits completed</p>
+                        </div>
+                        <div class="bg-white rounded-2xl p-6 shadow-sm">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold text-gray-800">Current Streak</h3>
+                                <i class="ri-calendar-check-line text-secondary text-xl"></i>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-4xl font-bold text-primary mb-2">12</div>
+                                <p class="text-gray-600">days in a row</p>
+                                <div class="mt-4 flex justify-center space-x-1">
+                                    <div class="w-3 h-3 bg-primary rounded-full"></div>
+                                    <div class="w-3 h-3 bg-primary rounded-full"></div>
+                                    <div class="w-3 h-3 bg-primary rounded-full"></div>
+                                    <div class="w-3 h-3 bg-gray-200 rounded-full"></div>
+                                    <div class="w-3 h-3 bg-gray-200 rounded-full"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-2xl p-6 shadow-sm">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold text-gray-800">Weekly Overview</h3>
+                                <i class="ri-bar-chart-line text-orange-400 text-xl"></i>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-gray-600">Mon</span>
+                                    <div class="flex space-x-1">
+                                        <div class="w-2 h-2 bg-primary rounded-full"></div>
+                                        <div class="w-2 h-2 bg-primary rounded-full"></div>
+                                        <div class="w-2 h-2 bg-primary rounded-full"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-gray-600">Tue</span>
+                                    <div class="flex space-x-1">
+                                        <div class="w-2 h-2 bg-primary rounded-full"></div>
+                                        <div class="w-2 h-2 bg-primary rounded-full"></div>
+                                        <div class="w-2 h-2 bg-gray-200 rounded-full"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-gray-600">Wed</span>
+                                    <div class="flex space-x-1">
+                                        <div class="w-2 h-2 bg-primary rounded-full"></div>
+                                        <div class="w-2 h-2 bg-primary rounded-full"></div>
+                                        <div class="w-2 h-2 bg-primary rounded-full"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-semibold text-gray-800">Thu</span>
+                                    <div class="flex space-x-1">
+                                        <div class="w-2 h-2 bg-primary rounded-full"></div>
+                                        <div class="w-2 h-2 bg-primary rounded-full"></div>
+                                        <div class="w-2 h-2 bg-gray-200 rounded-full"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Today's Habits & AI Coach -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Today's Habits -->
+                        <div>
+                            <div class="flex items-center justify-between mb-6">
+                                <h2 class="text-xl font-bold text-gray-800">Today's Habits</h2>
+                                <button
+                                    class="bg-primary text-white px-4 py-2 rounded-button !rounded-button whitespace-nowrap flex items-center space-x-2 hover:bg-blue-600">
+                                    <i class="ri-add-line"></i>
+                                    <span>Add Habit</span>
+                                </button>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="habit-card bg-white rounded-2xl p-6 shadow-sm border-l-4 border-green-400">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-4">
+                                            <div
+                                                class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                                <i class="ri-run-line text-green-600 text-xl"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="font-semibold text-gray-800">Morning Run</h3>
+                                                <p class="text-sm text-gray-600">30 minutes • 7:00 AM</p>
+                                            </div>
+                                        </div>
+                                        <input type="checkbox" class="custom-checkbox" checked>
+                                    </div>
+                                    <div class="mt-4">
+                                        <div class="flex justify-between text-sm text-gray-600 mb-1">
+                                            <span>Progress</span>
+                                            <span>30/30 min</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                            <div class="bg-green-500 h-2 rounded-full" style="width: 100%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="habit-card bg-white rounded-2xl p-6 shadow-sm border-l-4 border-blue-400">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-4">
+                                            <div
+                                                class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                                <i class="ri-book-open-line text-blue-600 text-xl"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="font-semibold text-gray-800">Read 20 Pages</h3>
+                                                <p class="text-sm text-gray-600">Daily reading • 8:00 PM</p>
+                                            </div>
+                                        </div>
+                                        <input type="checkbox" class="custom-checkbox" checked>
+                                    </div>
+                                    <div class="mt-4">
+                                        <div class="flex justify-between text-sm text-gray-600 mb-1">
+                                            <span>Progress</span>
+                                            <span>20/20 pages</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                            <div class="bg-blue-500 h-2 rounded-full" style="width: 100%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="habit-card bg-white rounded-2xl p-6 shadow-sm border-l-4 border-purple-400">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-4">
+                                            <div
+                                                class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                                                <i class="ri-mental-health-line text-purple-600 text-xl"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="font-semibold text-gray-800">Meditation</h3>
+                                                <p class="text-sm text-gray-600">15 minutes • 6:30 AM</p>
+                                            </div>
+                                        </div>
+                                        <input type="checkbox" class="custom-checkbox">
+                                    </div>
+                                    <div class="mt-4">
+                                        <div class="flex justify-between text-sm text-gray-600 mb-1">
+                                            <span>Progress</span>
+                                            <span>8/15 min</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                            <div class="bg-purple-500 h-2 rounded-full" style="width: 53%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="habit-card bg-white rounded-2xl p-6 shadow-sm border-l-4 border-orange-400">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-4">
+                                            <div
+                                                class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                                                <i class="ri-drop-line text-orange-600 text-xl"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="font-semibold text-gray-800">Drink Water</h3>
+                                                <p class="text-sm text-gray-600">8 glasses daily</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="text-sm font-semibold text-gray-800">6/8</span>
+                                            <button
+                                                class="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center hover:bg-orange-600">
+                                                <i class="ri-add-line text-sm"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="mt-4">
+                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                            <div class="bg-orange-500 h-2 rounded-full" style="width: 75%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- AI Coach Panel -->
+                        <div>
+                            <div class="flex items-center justify-between mb-6">
+                                <h2 class="text-xl font-bold text-gray-800">AI Wellness Coach</h2>
+                                <i class="ri-robot-line text-primary text-2xl"></i>
+                            </div>
+                            <div class="space-y-4">
+                                <div
+                                    class="ai-message bg-gradient-to-r from-primary to-secondary rounded-2xl p-6 text-white">
+                                    <div class="flex items-start space-x-3">
+                                        <div
+                                            class="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <i class="ri-robot-line text-white"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium mb-2">Great progress this week!</p>
+                                            <p class="text-sm opacity-90">You've improved your sleep habit by 15% and
+                                                maintained a 12-day streak. Keep up the amazing work!</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-white rounded-2xl p-6 shadow-sm">
+                                    <h3 class="font-semibold text-gray-800 mb-4">Personalized Suggestions</h3>
+                                    <div class="space-y-3">
+                                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                            <div class="flex items-center space-x-3">
+                                                <i class="ri-lightbulb-line text-yellow-500"></i>
+                                                <span class="text-sm text-gray-700">Try evening stretches for better
+                                                    sleep</span>
+                                            </div>
+                                            <button
+                                                class="text-primary text-sm font-medium hover:underline">Add</button>
+                                        </div>
+                                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                            <div class="flex items-center space-x-3">
+                                                <i class="ri-lightbulb-line text-yellow-500"></i>
+                                                <span class="text-sm text-gray-700">Set a phone-free hour before
+                                                    bed</span>
+                                            </div>
+                                            <button
+                                                class="text-primary text-sm font-medium hover:underline">Add</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-white rounded-2xl p-6 shadow-sm">
+                                    <h3 class="font-semibold text-gray-800 mb-4">Weekly Insights</h3>
+                                    <div id="insightsChart" class="h-48"></div>
+                                </div>
+                                <!-- Mood Tracker Quick Access -->
+                                <div class="bg-white rounded-2xl p-6 shadow-sm">
+                                    <h3 class="font-semibold text-gray-800 mb-4">How are you feeling today?</h3>
+                                    <div class="flex justify-between items-center mb-4">
+                                        <span class="mood-emoji cursor-pointer text-2xl" data-mood="1">😢</span>
+                                        <span class="mood-emoji cursor-pointer text-2xl" data-mood="2">😕</span>
+                                        <span class="mood-emoji cursor-pointer text-2xl" data-mood="3">😐</span>
+                                        <span class="mood-emoji cursor-pointer text-2xl" data-mood="4">🙂</span>
+                                        <span class="mood-emoji cursor-pointer text-2xl selected"
+                                            data-mood="5">😊</span>
+                                    </div>
+                                    <textarea class="w-full p-3 border border-gray-200 rounded-lg text-sm resize-none"
+                                        rows="3" placeholder="How was your day? (optional)"></textarea>
+                                    <button
+                                        class="mt-3 bg-primary text-white px-4 py-2 rounded-button !rounded-button whitespace-nowrap text-sm">Save
+                                        Entry</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Achievements & Gamification -->
+                    <div class="mt-8">
+                        <h2 class="text-xl font-bold text-gray-800 mb-6">Recent Achievements</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-white rounded-2xl p-6 shadow-sm text-center">
+                                <div
+                                    class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="ri-trophy-line text-yellow-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-800 mb-2">Week Warrior</h3>
+                                <p class="text-sm text-gray-600">Completed all habits for 7 days straight</p>
+                                <div class="mt-3 text-xs text-yellow-600 font-medium">+50 XP</div>
+                            </div>
+                            <div class="bg-white rounded-2xl p-6 shadow-sm text-center">
+                                <div
+                                    class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="ri-book-line text-blue-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-800 mb-2">Bookworm</h3>
+                                <p class="text-sm text-gray-600">Read for 30 consecutive days</p>
+                                <div class="mt-3 text-xs text-blue-600 font-medium">+75 XP</div>
+                            </div>
+                            <div class="bg-white rounded-2xl p-6 shadow-sm text-center">
+                                <div
+                                    class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="ri-heart-pulse-line text-green-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-800 mb-2">Fitness Fanatic</h3>
+                                <p class="text-sm text-gray-600">Exercised 20 times this month</p>
+                                <div class="mt-3 text-xs text-green-600 font-medium">+100 XP</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Sidebar Toggle
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarTexts = document.querySelectorAll('.sidebar-text');
+            
+            sidebarToggle.addEventListener('click', function () {
+                sidebar.classList.toggle('sidebar-collapsed');
+                sidebar.classList.toggle('sidebar-expanded');
+                sidebarTexts.forEach(text => {
+                    text.style.display = sidebar.classList.contains('sidebar-collapsed') ? 'none' : 'block';
+                });
+            });
+
+            // Dark Mode Toggle
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            darkModeToggle.addEventListener('click', function () {
+                darkModeToggle.classList.toggle('active');
+            });
+
+            // User Dropdown Toggle
+            const userMenuButton = document.getElementById('userMenuButton');
+            const userDropdown = document.getElementById('userDropdown');
+            
+            if (userMenuButton && userDropdown) {
+                userMenuButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('show');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!userMenuButton.contains(e.target) && !userDropdown.contains(e.target)) {
+                        userDropdown.classList.remove('show');
+                    }
+                });
+
+                // Close dropdown when pressing Escape
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        userDropdown.classList.remove('show');
+                    }
+                });
+            }
+
+            // Habit Interactions
+            const checkboxes = document.querySelectorAll('.custom-checkbox');
+            const waterButton = document.querySelector('.habit-card:last-of-type button');
+            const waterCount = document.querySelector('.habit-card:last-of-type .text-sm.font-semibold');
+            const waterProgress = document.querySelector('.habit-card:last-of-type .bg-orange-500');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    const habitCard = this.closest('.habit-card');
+                    if (this.checked) {
+                        habitCard.style.transform = 'scale(1.02)';
+                        setTimeout(() => {
+                            habitCard.style.transform = 'scale(1)';
+                        }, 200);
+                    }
+                });
+            });
+
+            // Water tracking
+            let waterGlasses = 6;
+            if (waterButton) {
+                waterButton.addEventListener('click', function () {
+                    if (waterGlasses < 8) {
+                        waterGlasses++;
+                        waterCount.textContent = `${waterGlasses}/8`;
+                        const percentage = (waterGlasses / 8) * 100;
+                        waterProgress.style.width = `${percentage}%`;
+                    }
+                });
+            }
+
+            // Mood Tracker
+            const moodEmojis = document.querySelectorAll('.mood-emoji');
+            moodEmojis.forEach(emoji => {
+                emoji.addEventListener('click', function () {
+                    moodEmojis.forEach(e => e.classList.remove('selected'));
+                    this.classList.add('selected');
+                    this.style.transform = 'scale(1.3)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                    }, 200);
+                });
+            });
+
+            // Insights Chart
+            const chartDom = document.getElementById('insightsChart');
+            if (chartDom) {
+                const myChart = echarts.init(chartDom);
+                const option = {
+                    animation: false,
+                    grid: {
+                        top: 0,
+                        bottom: 0,
+                        left: 0,
+                        right: 0
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        axisLine: { show: false },
+                        axisTick: { show: false },
+                        axisLabel: { color: '#6b7280', fontSize: 12 }
+                    },
+                    yAxis: {
+                        type: 'value',
+                        show: false
+                    },
+                    series: [{
+                        data: [85, 92, 78, 95, 88, 90, 87],
+                        type: 'line',
+                        smooth: true,
+                        symbol: 'none',
+                        lineStyle: {
+                            color: '#57B5E7',
+                            width: 3
+                        },
+                        areaStyle: {
+                            color: {
+                                type: 'linear',
+                                x: 0,
+                                y: 0,
+                                x2: 0,
+                                y2: 1,
+                                colorStops: [{
+                                    offset: 0,
+                                    color: 'rgba(87, 181, 231, 0.1)'
+                                }, {
+                                    offset: 1,
+                                    color: 'rgba(87, 181, 231, 0.01)'
+                                }]
+                            }
+                        }
+                    }],
+                    tooltip: {
+                        trigger: 'axis',
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        borderColor: '#e5e7eb',
+                        textStyle: {
+                            color: '#1f2937'
+                        }
+                    }
+                };
+                myChart.setOption(option);
+            }
+        });
+    </script>
+</body>
+
+</html> 
