@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habits - Wellnest</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#57B5E7',
+                        secondary: '#8DD3C7'
+                    },
+                    borderRadius: {
+                        'none': '0px',
+                        'sm': '4px',
+                        DEFAULT: '8px',
+                        'md': '12px',
+                        'lg': '16px',
+                        'xl': '20px',
+                        '2xl': '24px',
+                        '3xl': '32px',
+                        'full': '9999px',
+                        'button': '8px'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+    <style>
+        :where([class^="ri-"])::before {
+            content: "\f3c2";
+        }
+
+        .user-dropdown {
+            display: none;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.2s ease-in-out;
+            z-index: 50;
+        }
+
+        .user-dropdown.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .sidebar-collapsed {
+            width: 4rem;
+        }
+
+        .sidebar-expanded {
+            width: 16rem;
+        }
+
+        .custom-checkbox {
+            appearance: none;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            width: 1.25rem;
+            height: 1.25rem;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .custom-checkbox:checked {
+            background: #57B5E7;
+            border-color: #57B5E7;
+        }
+
+        .custom-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .custom-toggle {
+            width: 3rem;
+            height: 1.5rem;
+            background: #e5e7eb;
+            border-radius: 9999px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .custom-toggle.active {
+            background: #57B5E7;
+        }
+
+        .custom-toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 1.25rem;
+            height: 1.25rem;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .custom-toggle.active::after {
+            transform: translateX(1.5rem);
+        }
+
+        .habit-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .habit-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-button.active {
+            background: #57B5E7;
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .custom-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 0.5rem;
+        }
+
+        .icon-option {
+            width: 3rem;
+            height: 3rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .icon-option:hover {
+            border-color: #57B5E7;
+            background: #f0f9ff;
+        }
+
+        .icon-option.selected {
+            border-color: #57B5E7;
+            background: #57B5E7;
+            color: white;
+        }
+
+        .frequency-option {
+            padding: 0.5rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .frequency-option:hover {
+            border-color: #57B5E7;
+            background: #f0f9ff;
+        }
+
+        .frequency-option.selected {
+            border-color: #57B5E7;
+            background: #57B5E7;
+            color: white;
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+            transition: stroke-dashoffset 0.5s ease-in-out;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div id="sidebar"
+            class="sidebar-expanded bg-white shadow-lg transition-all duration-300 ease-in-out flex flex-col">
+            <div class="p-6 border-b border-gray-100">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="ri-heart-pulse-line text-white text-lg"></i>
+                    </div>
+                    <a href="{{ url_for('hello_world') }}">
+                        <span class="font-['Pacifico'] text-xl text-gray-800">Wellnest</span>
+                    </a>
+                </div>
+            </div>
+            <nav class="flex-1 p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="{{ url_for('dashboard') }}" data-readdy="true"
+                            class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="ri-dashboard-line"></i>
+                            </div>
+                            <span class="sidebar-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('habits') }}"
+                            class="nav-item active flex items-center space-x-3 px-4 py-3 rounded-lg bg-primary text-white">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="ri-checkbox-circle-line"></i>
+                            </div>
+                            <span class="sidebar-text">Habits</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('moodtracker') }}"
+                            class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="ri-emotion-line"></i>
+                            </div>
+                            <span class="sidebar-text">Mood Tracker</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('ai_coach') }}"
+                            class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="ri-robot-line"></i>
+                            </div>
+                            <span class="sidebar-text">AI Coach</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('achievement') }}"
+                            class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="ri-trophy-line"></i>
+                            </div>
+                            <span class="sidebar-text">Achievements</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('setting') }}" data-readdy="true"
+                            class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="ri-settings-line"></i>
+                            </div>
+                            <span class="sidebar-text">Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="p-4 border-t border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div class="custom-toggle" id="darkModeToggle"></div>
+                    <span class="text-sm text-gray-600 sidebar-text">Dark Mode</span>
+                </div>
+            </div>
+        </div>
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white border-b border-gray-100 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <button id="sidebarToggle"
+                            class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-50">
+                            <i class="ri-menu-line text-gray-600"></i>
+                        </button>
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Habits Management</h1>
+                            <p class="text-gray-600">Track and manage your daily habits</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-4">
+                            <button
+                                class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-50 relative">
+                                <i class="ri-notification-line text-gray-600"></i>
+                                <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+                            </button>
+                            <div class="relative">
+                                <button id="userMenuButton"
+                                    class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-semibold hover:bg-primary/90 transition-colors">
+                                    {{ initial }}
+                                </button>
+                                <!-- Dropdown Menu -->
+                                <div id="userDropdown"
+                                    class="user-dropdown absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1">
+                                    <div class="px-4 py-2 border-b border-gray-100">
+                                        <p class="text-sm font-medium text-gray-900">{{ user_name }}</p>
+                                        <p class="text-xs text-gray-500">{{ user_email }}</p>
+                                    </div>
+                                    <a href="{{ url_for('dashboard') }}"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                        <i class="ri-dashboard-line mr-2"></i>Dashboard
+                                    </a>
+                                    <a href="{{ url_for('setting') }}"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                        <i class="ri-settings-line mr-2"></i>Settings
+                                    </a>
+                                    <hr class="my-1">
+                                    <a href="{{ url_for('logout') }}"
+                                        class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                        <i class="ri-logout-box-line mr-2"></i>Sign Out
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <!-- Main Content -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <div class="max-w-7xl mx-auto">
+                    <!-- Statistics Overview -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white rounded-2xl p-6 shadow-sm">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-sm font-medium text-gray-600">Total Habits</h3>
+                                <i class="ri-checkbox-circle-line text-primary"></i>
+                            </div>
+                            <div class="text-2xl font-bold text-gray-800">12</div>
+                            <p class="text-xs text-green-600">+2 this week</p>
+                        </div>
+                        <div class="bg-white rounded-2xl p-6 shadow-sm">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-sm font-medium text-gray-600">Active Habits</h3>
+                                <i class="ri-play-circle-line text-green-500"></i>
+                            </div>
+                            <div class="text-2xl font-bold text-gray-800">9</div>
+                            <p class="text-xs text-gray-500">75% of total</p>
+                        </div>
+                        <div class="bg-white rounded-2xl p-6 shadow-sm">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-sm font-medium text-gray-600">Completion Rate</h3>
+                                <i class="ri-trophy-line text-yellow-500"></i>
+                            </div>
+                            <div class="text-2xl font-bold text-gray-800">87%</div>
+                            <p class="text-xs text-green-600">+5% vs last week</p>
+                        </div>
+                        <div class="bg-white rounded-2xl p-6 shadow-sm">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-sm font-medium text-gray-600">Best Streak</h3>
+                                <i class="ri-fire-line text-orange-500"></i>
+                            </div>
+                            <div class="text-2xl font-bold text-gray-800">24</div>
+                            <p class="text-xs text-gray-500">days</p>
+                        </div>
+                    </div>
+                    <!-- Filters and Actions -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm mb-8">
+                        <div
+                            class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+                            <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                                <div class="flex space-x-2">
+                                    <button
+                                        class="filter-button active px-4 py-2 rounded-button !rounded-button whitespace-nowrap text-sm"
+                                        data-filter="all">All Habits</button>
+                                    <button
+                                        class="filter-button px-4 py-2 rounded-button !rounded-button whitespace-nowrap text-sm bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                        data-filter="active">Active</button>
+                                    <button
+                                        class="filter-button px-4 py-2 rounded-button !rounded-button whitespace-nowrap text-sm bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                        data-filter="inactive">Inactive</button>
+                                </div>
+                                <select class="custom-select px-4 py-2 border border-gray-200 rounded-button text-sm"
+                                    id="categoryFilter">
+                                    <option value="all">All Categories</option>
+                                    <option value="health">Health & Fitness</option>
+                                    <option value="learning">Learning</option>
+                                    <option value="productivity">Productivity</option>
+                                    <option value="wellness">Wellness</option>
+                                    <option value="social">Social</option>
+                                </select>
+                                <div class="relative">
+                                    <input type="text" placeholder="Search habits..."
+                                        class="pl-10 pr-4 py-2 border border-gray-200 rounded-button text-sm w-64"
+                                        id="searchInput">
+                                    <i
+                                        class="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                </div>
+                            </div>
+                            <button id="addHabitBtn"
+                                class="bg-primary text-white px-6 py-2 rounded-button !rounded-button whitespace-nowrap flex items-center space-x-2 hover:bg-blue-600">
+                                <i class="ri-add-line"></i>
+                                <span>Add New Habit</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Habits Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8" id="habitsGrid">
+                        <!-- Habit Card 1 -->
+                        <div class="habit-card bg-white rounded-2xl p-6 shadow-sm border-l-4 border-green-400"
+                            data-category="health" data-status="active">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                        <i class="ri-run-line text-green-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">Morning Run</h3>
+                                        <p class="text-sm text-gray-600">Health & Fitness</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button
+                                        class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 edit-habit">
+                                        <i class="ri-edit-line text-gray-600"></i>
+                                    </button>
+                                    <div class="custom-toggle active habit-toggle"></div>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <div class="flex justify-between text-sm text-gray-600 mb-2">
+                                    <span>7-day streak</span>
+                                    <span>Daily • 7:00 AM</span>
+                                </div>
+                                <div class="flex items-center justify-center mb-3">
+                                    <div class="relative w-16 h-16">
+                                        <svg class="w-16 h-16 progress-ring">
+                                            <circle cx="32" cy="32" r="28" stroke="#e5e7eb" stroke-width="4"
+                                                fill="none" />
+                                            <circle cx="32" cy="32" r="28" stroke="#10b981" stroke-width="4" fill="none"
+                                                stroke-dasharray="175.9" stroke-dashoffset="35.18" />
+                                        </svg>
+                                        <div class="absolute inset-0 flex items-center justify-center">
+                                            <span class="text-sm font-bold text-gray-800">80%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex space-x-1">
+                                    <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-gray-200 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-gray-200 rounded-full"></div>
+                                </div>
+                                <button class="text-red-500 hover:text-red-700 text-sm delete-habit">
+                                    <i class="ri-delete-bin-line"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Habit Card 2 -->
+                        <div class="habit-card bg-white rounded-2xl p-6 shadow-sm border-l-4 border-blue-400"
+                            data-category="learning" data-status="active">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                        <i class="ri-book-open-line text-blue-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">Daily Reading</h3>
+                                        <p class="text-sm text-gray-600">Learning</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button
+                                        class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 edit-habit">
+                                        <i class="ri-edit-line text-gray-600"></i>
+                                    </button>
+                                    <div class="custom-toggle active habit-toggle"></div>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <div class="flex justify-between text-sm text-gray-600 mb-2">
+                                    <span>12-day streak</span>
+                                    <span>Daily • 8:00 PM</span>
+                                </div>
+                                <div class="flex items-center justify-center mb-3">
+                                    <div class="relative w-16 h-16">
+                                        <svg class="w-16 h-16 progress-ring">
+                                            <circle cx="32" cy="32" r="28" stroke="#e5e7eb" stroke-width="4"
+                                                fill="none" />
+                                            <circle cx="32" cy="32" r="28" stroke="#3b82f6" stroke-width="4" fill="none"
+                                                stroke-dasharray="175.9" stroke-dashoffset="17.59" />
+                                        </svg>
+                                        <div class="absolute inset-0 flex items-center justify-center">
+                                            <span class="text-sm font-bold text-gray-800">90%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex space-x-1">
+                                    <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-gray-200 rounded-full"></div>
+                                </div>
+                                <button class="text-red-500 hover:text-red-700 text-sm delete-habit">
+                                    <i class="ri-delete-bin-line"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Habit Card 3 -->
+                        <div class="habit-card bg-white rounded-2xl p-6 shadow-sm border-l-4 border-purple-400"
+                            data-category="wellness" data-status="active">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                                        <i class="ri-mental-health-line text-purple-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">Meditation</h3>
+                                        <p class="text-sm text-gray-600">Wellness</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button
+                                        class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 edit-habit">
+                                        <i class="ri-edit-line text-gray-600"></i>
+                                    </button>
+                                    <div class="custom-toggle active habit-toggle"></div>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <div class="flex justify-between text-sm text-gray-600 mb-2">
+                                    <span>5-day streak</span>
+                                    <span>Daily • 6:30 AM</span>
+                                </div>
+                                <div class="flex items-center justify-center mb-3">
+                                    <div class="relative w-16 h-16">
+                                        <svg class="w-16 h-16 progress-ring">
+                                            <circle cx="32" cy="32" r="28" stroke="#e5e7eb" stroke-width="4"
+                                                fill="none" />
+                                            <circle cx="32" cy="32" r="28" stroke="#8b5cf6" stroke-width="4" fill="none"
+                                                stroke-dasharray="175.9" stroke-dashoffset="70.36" />
+                                        </svg>
+                                        <div class="absolute inset-0 flex items-center justify-center">
+                                            <span class="text-sm font-bold text-gray-800">60%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex space-x-1">
+                                    <div class="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-gray-200 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-gray-200 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-gray-200 rounded-full"></div>
+                                </div>
+                                <button class="text-red-500 hover:text-red-700 text-sm delete-habit">
+                                    <i class="ri-delete-bin-line"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Habit Card 4 -->
+                        <div class="habit-card bg-white rounded-2xl p-6 shadow-sm border-l-4 border-orange-400"
+                            data-category="health" data-status="active">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                                        <i class="ri-drop-line text-orange-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">Drink Water</h3>
+                                        <p class="text-sm text-gray-600">Health & Fitness</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button
+                                        class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 edit-habit">
+                                        <i class="ri-edit-line text-gray-600"></i>
+                                    </button>
+                                    <div class="custom-toggle active habit-toggle"></div>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <div class="flex justify-between text-sm text-gray-600 mb-2">
+                                    <span>15-day streak</span>
+                                    <span>8 glasses daily</span>
+                                </div>
+                                <div class="flex items-center justify-center mb-3">
+                                    <div class="relative w-16 h-16">
+                                        <svg class="w-16 h-16 progress-ring">
+                                            <circle cx="32" cy="32" r="28" stroke="#e5e7eb" stroke-width="4"
+                                                fill="none" />
+                                            <circle cx="32" cy="32" r="28" stroke="#f97316" stroke-width="4" fill="none"
+                                                stroke-dasharray="175.9" stroke-dashoffset="43.98" />
+                                        </svg>
+                                        <div class="absolute inset-0 flex items-center justify-center">
+                                            <span class="text-sm font-bold text-gray-800">75%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex space-x-1">
+                                    <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-gray-200 rounded-full"></div>
+                                </div>
+                                <button class="text-red-500 hover:text-red-700 text-sm delete-habit">
+                                    <i class="ri-delete-bin-line"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Habit Card 5 -->
+                        <div class="habit-card bg-white rounded-2xl p-6 shadow-sm border-l-4 border-teal-400"
+                            data-category="productivity" data-status="active">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center">
+                                        <i class="ri-code-line text-teal-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">Code Practice</h3>
+                                        <p class="text-sm text-gray-600">Productivity</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button
+                                        class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 edit-habit">
+                                        <i class="ri-edit-line text-gray-600"></i>
+                                    </button>
+                                    <div class="custom-toggle active habit-toggle"></div>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <div class="flex justify-between text-sm text-gray-600 mb-2">
+                                    <span>8-day streak</span>
+                                    <span>Daily • 9:00 PM</span>
+                                </div>
+                                <div class="flex items-center justify-center mb-3">
+                                    <div class="relative w-16 h-16">
+                                        <svg class="w-16 h-16 progress-ring">
+                                            <circle cx="32" cy="32" r="28" stroke="#e5e7eb" stroke-width="4"
+                                                fill="none" />
+                                            <circle cx="32" cy="32" r="28" stroke="#14b8a6" stroke-width="4" fill="none"
+                                                stroke-dasharray="175.9" stroke-dashoffset="52.77" />
+                                        </svg>
+                                        <div class="absolute inset-0 flex items-center justify-center">
+                                            <span class="text-sm font-bold text-gray-800">70%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex space-x-1">
+                                    <div class="w-2 h-2 bg-teal-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-teal-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-teal-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-teal-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-teal-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-gray-200 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-gray-200 rounded-full"></div>
+                                </div>
+                                <button class="text-red-500 hover:text-red-700 text-sm delete-habit">
+                                    <i class="ri-delete-bin-line"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Habit Card 6 -->
+                        <div class="habit-card bg-white rounded-2xl p-6 shadow-sm border-l-4 border-gray-400"
+                            data-category="social" data-status="inactive">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+                                        <i class="ri-phone-line text-gray-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">Call Family</h3>
+                                        <p class="text-sm text-gray-600">Social</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button
+                                        class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 edit-habit">
+                                        <i class="ri-edit-line text-gray-600"></i>
+                                    </button>
+                                    <div class="custom-toggle habit-toggle"></div>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <div class="flex justify-between text-sm text-gray-600 mb-2">
+                                    <span>Paused</span>
+                                    <span>Weekly • Sunday</span>
+                                </div>
+                                <div class="flex items-center justify-center mb-3">
+                                    <div class="relative w-16 h-16">
+                                        <svg class="w-16 h-16 progress-ring">
+                                            <circle cx="32" cy="32" r="28" stroke="#e5e7eb" stroke-width="4"
+                                                fill="none" />
+                                            <circle cx="32" cy="32" r="28" stroke="#9ca3af" stroke-width="4" fill="none"
+                                                stroke-dasharray="175.9" stroke-dashoffset="140.72" />
+                                        </svg>
+                                        <div class="absolute inset-0 flex items-center justify-center">
+                                            <span class="text-sm font-bold text-gray-800">20%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex space-x-1">
+                                    <div class="w-2 h-2 bg-gray-500 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-gray-200 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-gray-200 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-gray-200 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-gray-200 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-gray-200 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-gray-200 rounded-full"></div>
+                                </div>
+                                <button class="text-red-500 hover:text-red-700 text-sm delete-habit">
+                                    <i class="ri-delete-bin-line"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Analytics Section -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Completion Trends -->
+                        <div class="bg-white rounded-2xl p-6 shadow-sm">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Completion Trends</h3>
+                            <div id="completionChart" class="h-64"></div>
+                        </div>
+                        <!-- Category Distribution -->
+                        <div class="bg-white rounded-2xl p-6 shadow-sm">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Habits by Category</h3>
+                            <div id="categoryChart" class="h-64"></div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <!-- Add/Edit Habit Modal -->
+    <div id="habitModal" class="modal">
+        <div class="bg-white rounded-2xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h2 id="modalTitle" class="text-2xl font-bold text-gray-800">Add New Habit</h2>
+                <button id="closeModal" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100">
+                    <i class="ri-close-line text-gray-600"></i>
+                </button>
+            </div>
+            <form id="habitForm">
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Habit Name</label>
+                        <input type="text" id="habitName"
+                            class="w-full px-4 py-3 border border-gray-200 rounded-button text-sm"
+                            placeholder="Enter habit name" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                        <textarea id="habitDescription"
+                            class="w-full px-4 py-3 border border-gray-200 rounded-button text-sm resize-none" rows="3"
+                            placeholder="Optional description"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">Choose Icon</label>
+                        <div class="icon-grid">
+                            <div class="icon-option" data-icon="ri-run-line">
+                                <i class="ri-run-line text-xl"></i>
+                            </div>
+                            <div class="icon-option" data-icon="ri-book-open-line">
+                                <i class="ri-book-open-line text-xl"></i>
+                            </div>
+                            <div class="icon-option" data-icon="ri-mental-health-line">
+                                <i class="ri-mental-health-line text-xl"></i>
+                            </div>
+                            <div class="icon-option" data-icon="ri-drop-line">
+                                <i class="ri-drop-line text-xl"></i>
+                            </div>
+                            <div class="icon-option" data-icon="ri-code-line">
+                                <i class="ri-code-line text-xl"></i>
+                            </div>
+                            <div class="icon-option" data-icon="ri-phone-line">
+                                <i class="ri-phone-line text-xl"></i>
+                            </div>
+                            <div class="icon-option" data-icon="ri-music-line">
+                                <i class="ri-music-line text-xl"></i>
+                            </div>
+                            <div class="icon-option" data-icon="ri-camera-line">
+                                <i class="ri-camera-line text-xl"></i>
+                            </div>
+                            <div class="icon-option" data-icon="ri-plant-line">
+                                <i class="ri-plant-line text-xl"></i>
+                            </div>
+                            <div class="icon-option" data-icon="ri-palette-line">
+                                <i class="ri-palette-line text-xl"></i>
+                            </div>
+                            <div class="icon-option" data-icon="ri-gamepad-line">
+                                <i class="ri-gamepad-line text-xl"></i>
+                            </div>
+                            <div class="icon-option" data-icon="ri-heart-line">
+                                <i class="ri-heart-line text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                        <select id="habitCategory"
+                            class="custom-select w-full px-4 py-3 border border-gray-200 rounded-button text-sm"
+                            required>
+                            <option value="">Select category</option>
+                            <option value="health">Health & Fitness</option>
+                            <option value="learning">Learning</option>
+                            <option value="productivity">Productivity</option>
+                            <option value="wellness">Wellness</option>
+                            <option value="social">Social</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">Frequency</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="frequency-option selected" data-frequency="daily">
+                                <div class="text-center">
+                                    <i class="ri-calendar-line text-xl mb-1"></i>
+                                    <div class="text-sm font-medium">Daily</div>
+                                </div>
+                            </div>
+                            <div class="frequency-option" data-frequency="weekly">
+                                <div class="text-center">
+                                    <i class="ri-calendar-week-line text-xl mb-1"></i>
+                                    <div class="text-sm font-medium">Weekly</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Reminder Time</label>
+                        <input type="time" id="reminderTime"
+                            class="w-full px-4 py-3 border border-gray-200 rounded-button text-sm">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="custom-toggle active" id="enableReminders"></div>
+                            <span class="text-sm text-gray-700">Enable reminders</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex space-x-4 mt-8">
+                    <button type="button" id="cancelBtn"
+                        class="flex-1 px-6 py-3 border border-gray-200 rounded-button !rounded-button whitespace-nowrap text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="submit"
+                        class="flex-1 px-6 py-3 bg-primary text-white rounded-button !rounded-button whitespace-nowrap hover:bg-blue-600">Save
+                        Habit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script id="sidebarToggle">
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarTexts = document.querySelectorAll('.sidebar-text');
+            sidebarToggle.addEventListener('click', function () {
+                sidebar.classList.toggle('sidebar-collapsed');
+                sidebar.classList.toggle('sidebar-expanded');
+                sidebarTexts.forEach(text => {
+                    text.style.display = sidebar.classList.contains('sidebar-collapsed') ? 'none' : 'block';
+                });
+            });
+        });
+    </script>
+    <script id="darkModeToggle">
+        document.addEventListener('DOMContentLoaded', function () {
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            darkModeToggle.addEventListener('click', function () {
+                darkModeToggle.classList.toggle('active');
+            });
+        });
+    </script>
+    <script id="filterFunctionality">
+        document.addEventListener('DOMContentLoaded', function () {
+            const filterButtons = document.querySelectorAll('.filter-button');
+            const categoryFilter = document.getElementById('categoryFilter');
+            const searchInput = document.getElementById('searchInput');
+            const habitCards = document.querySelectorAll('.habit-card');
+            function filterHabits() {
+                const activeFilter = document.querySelector('.filter-button.active').dataset.filter;
+                const categoryValue = categoryFilter.value;
+                const searchValue = searchInput.value.toLowerCase();
+                habitCards.forEach(card => {
+                    const status = card.dataset.status;
+                    const category = card.dataset.category;
+                    const habitName = card.querySelector('h3').textContent.toLowerCase();
+                    let showCard = true;
+                    if (activeFilter !== 'all' && status !== activeFilter) {
+                        showCard = false;
+                    }
+                    if (categoryValue !== 'all' && category !== categoryValue) {
+                        showCard = false;
+                    }
+                    if (searchValue && !habitName.includes(searchValue)) {
+                        showCard = false;
+                    }
+                    card.style.display = showCard ? 'block' : 'none';
+                });
+            }
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    filterButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.classList.add('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+                    });
+                    this.classList.add('active');
+                    this.classList.remove('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+                    filterHabits();
+                });
+            });
+            categoryFilter.addEventListener('change', filterHabits);
+            searchInput.addEventListener('input', filterHabits);
+        });
+    </script>
+    <script id="habitModal">
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.getElementById('habitModal');
+            const addHabitBtn = document.getElementById('addHabitBtn');
+            const closeModal = document.getElementById('closeModal');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const habitForm = document.getElementById('habitForm');
+            const iconOptions = document.querySelectorAll('.icon-option');
+            const frequencyOptions = document.querySelectorAll('.frequency-option');
+            const enableReminders = document.getElementById('enableReminders');
+            const editButtons = document.querySelectorAll('.edit-habit');
+            let selectedIcon = 'ri-run-line';
+            let selectedFrequency = 'daily';
+            addHabitBtn.addEventListener('click', function () {
+                document.getElementById('modalTitle').textContent = 'Add New Habit';
+                habitForm.reset();
+                modal.classList.add('active');
+            });
+            editButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    document.getElementById('modalTitle').textContent = 'Edit Habit';
+                    modal.classList.add('active');
+                });
+            });
+            closeModal.addEventListener('click', function () {
+                modal.classList.remove('active');
+            });
+            cancelBtn.addEventListener('click', function () {
+                modal.classList.remove('active');
+            });
+            modal.addEventListener('click', function (e) {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+            iconOptions.forEach(option => {
+                option.addEventListener('click', function () {
+                    iconOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedIcon = this.dataset.icon;
+                });
+            });
+            frequencyOptions.forEach(option => {
+                option.addEventListener('click', function () {
+                    frequencyOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedFrequency = this.dataset.frequency;
+                });
+            });
+            enableReminders.addEventListener('click', function () {
+                enableReminders.classList.toggle('active');
+            });
+            habitForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                modal.classList.remove('active');
+            });
+        });
+    </script>
+    <script id="habitInteractions">
+        document.addEventListener('DOMContentLoaded', function () {
+            const habitToggles = document.querySelectorAll('.habit-toggle');
+            const deleteButtons = document.querySelectorAll('.delete-habit');
+            habitToggles.forEach(toggle => {
+                toggle.addEventListener('click', function () {
+                    toggle.classList.toggle('active');
+                    const habitCard = toggle.closest('.habit-card');
+                    const status = toggle.classList.contains('active') ? 'active' : 'inactive';
+                    habitCard.dataset.status = status;
+                    if (status === 'inactive') {
+                        habitCard.classList.add('opacity-60');
+                    } else {
+                        habitCard.classList.remove('opacity-60');
+                    }
+                });
+            });
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    if (confirm('Are you sure you want to delete this habit?')) {
+                        const habitCard = button.closest('.habit-card');
+                        habitCard.style.transform = 'scale(0)';
+                        habitCard.style.opacity = '0';
+                        setTimeout(() => {
+                            habitCard.remove();
+                        }, 300);
+                    }
+                });
+            });
+        });
+    </script>
+    <script id="completionChart">
+        document.addEventListener('DOMContentLoaded', function () {
+            const chartDom = document.getElementById('completionChart');
+            const myChart = echarts.init(chartDom);
+            const option = {
+                animation: false,
+                grid: {
+                    top: 20,
+                    bottom: 20,
+                    left: 20,
+                    right: 20
+                },
+                xAxis: {
+                    type: 'category',
+                    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    axisLine: { show: false },
+                    axisTick: { show: false },
+                    axisLabel: { color: '#6b7280', fontSize: 12 }
+                },
+                yAxis: {
+                    type: 'value',
+                    show: false,
+                    max: 100
+                },
+                series: [{
+                    data: [85, 92, 78, 95, 88, 90, 87],
+                    type: 'line',
+                    smooth: true,
+                    symbol: 'none',
+                    lineStyle: {
+                        color: '#57B5E7',
+                        width: 3
+                    },
+                    areaStyle: {
+                        color: {
+                            type: 'linear',
+                            x: 0,
+                            y: 0,
+                            x2: 0,
+                            y2: 1,
+                            colorStops: [{
+                                offset: 0,
+                                color: 'rgba(87, 181, 231, 0.1)'
+                            }, {
+                                offset: 1,
+                                color: 'rgba(87, 181, 231, 0.01)'
+                            }]
+                        }
+                    }
+                }],
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    borderColor: '#e5e7eb',
+                    textStyle: {
+                        color: '#1f2937'
+                    }
+                }
+            };
+            myChart.setOption(option);
+        });
+    </script>
+    <script id="categoryChart">
+        document.addEventListener('DOMContentLoaded', function () {
+            const chartDom = document.getElementById('categoryChart');
+            const myChart = echarts.init(chartDom);
+            const option = {
+                animation: false,
+                series: [{
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    center: ['50%', '50%'],
+                    data: [
+                        { value: 4, name: 'Health & Fitness', itemStyle: { color: '#57B5E7' } },
+                        { value: 2, name: 'Learning', itemStyle: { color: '#8DD3C7' } },
+                        { value: 3, name: 'Productivity', itemStyle: { color: '#FBBF72' } },
+                        { value: 2, name: 'Wellness', itemStyle: { color: '#FC8D62' } },
+                        { value: 1, name: 'Social', itemStyle: { color: '#B3B3B3' } }
+                    ],
+                    label: {
+                        show: true,
+                        position: 'outside',
+                        color: '#1f2937',
+                        fontSize: 12
+                    },
+                    labelLine: {
+                        show: true
+                    }
+                }],
+                tooltip: {
+                    trigger: 'item',
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    borderColor: '#e5e7eb',
+                    textStyle: {
+                        color: '#1f2937'
+                    }
+                }
+            };
+            myChart.setOption(option);
+        });
+    </script>
+    <script id="user-dropdown-functionality">
+        document.addEventListener('DOMContentLoaded', function () {
+            const userMenuButton = document.getElementById('userMenuButton');
+            const userDropdown = document.getElementById('userDropdown');
+            
+            if (userMenuButton && userDropdown) {
+                userMenuButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('show');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!userMenuButton.contains(e.target) && !userDropdown.contains(e.target)) {
+                        userDropdown.classList.remove('show');
+                    }
+                });
+
+                // Close dropdown when pressing Escape
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        userDropdown.classList.remove('show');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - Wellnest</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#57B5E7',
+                        secondary: '#8DD3C7'
+                    },
+                    borderRadius: {
+                        'none': '0px',
+                        'sm': '4px',
+                        DEFAULT: '8px',
+                        'md': '12px',
+                        'lg': '16px',
+                        'xl': '20px',
+                        '2xl': '24px',
+                        '3xl': '32px',
+                        'full': '9999px',
+                        'button': '8px'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+    <style>
+        :where([class^="ri-"])::before {
+            content: "\f3c2";
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute top-20 left-10 w-32 h-32 bg-primary/5 rounded-full blur-3xl"></div>
+        <div class="absolute top-40 right-20 w-24 h-24 bg-secondary/5 rounded-full blur-2xl"></div>
+        <div class="absolute bottom-32 left-1/4 w-40 h-40 bg-primary/3 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-20 right-10 w-28 h-28 bg-secondary/4 rounded-full blur-2xl"></div>
+    </div>
+    <header class="relative w-full bg-white/95 backdrop-blur-sm border-b border-gray-100 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="font-['Pacifico'] text-2xl text-primary"><a href="{{url_for('hello_world')}}">logo</a></div>
+            <a href="{{url_for('hello_world')}}"
+                data-readdy="true"
+                class="text-gray-700 hover:text-primary transition-colors flex items-center space-x-2">
+                <i class="ri-arrow-left-line"></i>
+                <span>Back to Home</span>
+            </a>
+        </div>
+    </header>
+    <main class="relative flex items-center justify-center min-h-screen py-12 px-6">
+        <div class="w-full max-w-md">
+            <div class="bg-white rounded-2xl shadow-lg p-8">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+                    <p class="text-gray-600">Sign in to continue your wellness journey</p>
+                </div>
+                <form class="space-y-6" action="/signin" method="POST">
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="ri-mail-line text-gray-400"></i>
+                            </div>
+                            <input type="email" id="email" name="email" required
+                                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm"
+                                placeholder="Enter your email">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="ri-lock-line text-gray-400"></i>
+                            </div>
+                            <input type="password" id="password" name="password" required
+                                class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm"
+                                placeholder="Enter your password">
+                            <button type="button"
+                                class="absolute inset-y-0 right-0 pr-3 flex items-center password-toggle">
+                                <i class="ri-eye-off-line text-gray-400 hover:text-gray-600 transition-colors"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit"
+                        class="w-full bg-primary text-white py-3 !rounded-button font-semibold hover:bg-primary/90 transition-colors whitespace-nowrap">
+                        Sign In
+                    </button>
+                </form>
+                <div class="mt-6">
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-2 bg-white text-gray-500">or</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-6">
+                    <p class="text-gray-600">
+                        Don't have an account?
+                        <a href="{{url_for('signup_page')}}"
+                            data-readdy="true"
+                            class="text-primary hover:text-primary/80 font-semibold transition-colors">Sign up</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script id="password-toggle">
+        document.addEventListener('DOMContentLoaded', function () {
+            const passwordInput = document.getElementById('password');
+            const toggleButton = document.querySelector('.password-toggle');
+            const toggleIcon = toggleButton.querySelector('i');
+            toggleButton.addEventListener('click', function () {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    toggleIcon.className = 'ri-eye-line text-gray-400 hover:text-gray-600 transition-colors';
+                } else {
+                    passwordInput.type = 'password';
+                    toggleIcon.className = 'ri-eye-off-line text-gray-400 hover:text-gray-600 transition-colors';
+                }
+            });
+        });
+    </script>
+    <script id="checkbox-functionality">
+        document.addEventListener('DOMContentLoaded', function () {
+            const checkbox = document.querySelector('.remember-checkbox');
+            const checkboxCustom = document.querySelector('.checkbox-custom');
+            const checkIcon = document.querySelector('.check-icon');
+            checkboxCustom.addEventListener('click', function () {
+                checkbox.checked = !checkbox.checked;
+                if (checkbox.checked) {
+                    checkboxCustom.classList.add('bg-primary', 'border-primary');
+                    checkboxCustom.classList.remove('border-gray-300');
+                    checkIcon.classList.remove('hidden');
+                } else {
+                    checkboxCustom.classList.remove('bg-primary', 'border-primary');
+                    checkboxCustom.classList.add('border-gray-300');
+                    checkIcon.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+    <script id="form-validation">
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.querySelector('form');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            form.addEventListener('submit', function (e) {
+                let isValid = true;
+                if (!emailInput.value || !emailInput.value.includes('@')) {
+                    emailInput.classList.add('border-red-500', 'focus:ring-red-500', 'focus:border-red-500');
+                    emailInput.classList.remove('border-gray-300', 'focus:ring-primary', 'focus:border-primary');
+                    isValid = false;
+                } else {
+                    emailInput.classList.remove('border-red-500', 'focus:ring-red-500', 'focus:border-red-500');
+                    emailInput.classList.add('border-gray-300', 'focus:ring-primary', 'focus:border-primary');
+                }
+                if (!passwordInput.value || passwordInput.value.length < 6) {
+                    passwordInput.classList.add('border-red-500', 'focus:ring-red-500', 'focus:border-red-500');
+                    passwordInput.classList.remove('border-gray-300', 'focus:ring-primary', 'focus:border-primary');
+                    isValid = false;
+                } else {
+                    passwordInput.classList.remove('border-red-500', 'focus:ring-red-500', 'focus:border-red-500');
+                    passwordInput.classList.add('border-gray-300', 'focus:ring-primary', 'focus:border-primary');
+                }
+                if (isValid) {
+                    console.log('Form submitted successfully');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
