@@ -62,7 +62,9 @@
                     <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                         <i class="ri-heart-pulse-line text-white text-sm"></i>
                     </div>
-                    <span class="font-['Pacifico'] text-xl text-gray-800">Wellnest</span>
+                    <a href="{{ url_for('hello_world') }}">
+                        <span class="font-['Pacifico'] text-xl text-gray-800">Wellnest</span>
+                    </a>
                 </div>
                 <nav class="space-y-2">
                     <a href="{{ url_for('dashboard') }}"
@@ -143,7 +145,7 @@
                                     <p class="text-sm font-medium text-gray-900">{{ user_name }}</p>
                                     <p class="text-xs text-gray-500">{{ user_email }}</p>
                                 </div>
-                                <a href="{{# url_for('dashboard') }}"
+                                <a href="{{ url_for('dashboard') }}"
                                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                                     <i class="ri-dashboard-line mr-2"></i>Dashboard
                                 </a>

@@ -16,6 +16,10 @@
             content: "\f3c2";
         }
 
+        .h{
+            height: 500px;
+        }
+
         .user-dropdown {
             display: none;
             opacity: 0;
@@ -64,7 +68,9 @@
                     <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                         <i class="ri-heart-pulse-line text-white text-sm"></i>
                     </div>
-                    <span class="font-['Pacifico'] text-xl text-gray-800">Wellnest</span>
+                    <a href="{{ url_for('hello_world') }}">
+                        <span class="font-['Pacifico'] text-xl text-gray-800">Wellnest</span>
+                    </a>
                 </div>
                 <nav class="space-y-2">
                     <a href="{{ url_for('dashboard') }}"
@@ -224,8 +230,9 @@
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                 <div class="lg:col-span-2">
-                    <div class="bg-white rounded-2xl shadow-sm p-6">
-                        <div class="flex items-center justify-between mb-6">
+                    <div class="bg-white rounded-2xl shadow-sm p-6 h">
+                        <br><br>
+                        <div class="flex items-center justify-between mb-6" style="border-top: 2px solid rgb(67, 66, 66);">
                             <h3 class="text-lg font-semibold text-gray-800">Mood Calendar</h3>
                             <div class="flex items-center gap-2">
                                 <button id="prev-month"
@@ -249,7 +256,7 @@
                             <div class="text-xs font-medium text-gray-500 text-center py-2">Fri</div>
                             <div class="text-xs font-medium text-gray-500 text-center py-2">Sat</div>
                         </div>
-                        <div id="calendar-grid" class="grid grid-cols-7 gap-1">
+                        <div id="calendar-grid" class="grid grid-cols-7 gap-1" style="border-bottom: 2px solid rgb(67, 66, 66);">
                         </div>
                     </div>
                 </div>

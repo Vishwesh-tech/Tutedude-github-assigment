@@ -15,6 +15,13 @@
             content: "\f3c2";
         }
 
+        .h{
+            height: 583px;
+        }
+
+        .m{
+            height: 320px;
+        }
         .user-dropdown {
             display: none;
             opacity: 0;
@@ -63,7 +70,9 @@
                     <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                         <i class="ri-heart-pulse-line text-white text-sm"></i>
                     </div>
-                    <span class="font-['Pacifico'] text-xl text-gray-800">Wellnest</span>
+                    <a href="{{ url_for('hello_world') }}">
+                        <span class="font-['Pacifico'] text-xl text-gray-800">Wellnest</span>
+                    </a>
                 </div>
                 <nav class="space-y-2">
                     <a href="{{ url_for('dashboard') }}"
@@ -163,7 +172,7 @@
             </header>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                 <div class="lg:col-span-2">
-                    <div class="bg-white rounded-2xl shadow-sm p-6 h-96">
+                    <div class="bg-white rounded-2xl shadow-sm p-6 h">
                         <div class="flex items-center justify-between mb-6">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
@@ -182,7 +191,7 @@
                                 <i class="ri-more-line text-gray-600"></i>
                             </button>
                         </div>
-                        <div class="flex-1 space-y-4 mb-4 max-h-64 overflow-y-auto">
+                        <div class="flex-1 space-y-4 mb-4 m overflow-y-auto">
                             <div class="flex gap-3">
                                 <div
                                     class="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">

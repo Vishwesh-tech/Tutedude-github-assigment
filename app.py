@@ -4,7 +4,7 @@ import requests
 import os
 
 
-BACKEND_URL = os.environ.get('BACKEND_URL', 'http://localhost:8500')
+BACKEND_URL = os.environ.get('BACKEND_URL', "https://wellnest-saas-backend.onrender.com")
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 app.secret_key = "saas_secret_key"

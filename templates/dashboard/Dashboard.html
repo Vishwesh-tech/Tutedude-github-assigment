@@ -184,7 +184,9 @@
                     <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                         <i class="ri-heart-pulse-line text-white text-lg"></i>
                     </div>
-                    <span class="font-['Pacifico'] text-xl text-gray-800 sidebar-text">Wellnest</span>
+                    <a href="{{ url_for('hello_world') }}">
+                        <span class="font-['Pacifico'] text-xl text-gray-800">Wellnest</span>
+                    </a>
                 </div>
             </div>
             <nav class="flex-1 p-4">
@@ -273,30 +275,33 @@
                             <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
                         </button>
                         <div class="relative">
-                        <button 
-                            id="userMenuButton"
-                            class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-semibold hover:bg-primary/90 transition-colors">
-                            {{ initial }}
-                        </button>
-                        <!-- Dropdown Menu -->
-                        <div id="userDropdown" class="user-dropdown absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1">
-                            <div class="px-4 py-2 border-b border-gray-100">
-                                <p class="text-sm font-medium text-gray-900">{{ user_name }}</p>
-                                <p class="text-xs text-gray-500">{{ user_email }}</p>
+                            <button id="userMenuButton"
+                                class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-semibold hover:bg-primary/90 transition-colors">
+                                {{ initial }}
+                            </button>
+                            <!-- Dropdown Menu -->
+                            <div id="userDropdown"
+                                class="user-dropdown absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1">
+                                <div class="px-4 py-2 border-b border-gray-100">
+                                    <p class="text-sm font-medium text-gray-900">{{ user_name }}</p>
+                                    <p class="text-xs text-gray-500">{{ user_email }}</p>
+                                </div>
+                                <a href="{{ url_for('dashboard') }}"
+                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <i class="ri-dashboard-line mr-2"></i>Dashboard
+                                </a>
+                                <a href="{{ url_for('setting') }}"
+                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <i class="ri-settings-line mr-2"></i>Settings
+                                </a>
+                                <hr class="my-1">
+                                <a href="{{ url_for('logout') }}"
+                                    class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                    <i class="ri-logout-box-line mr-2"></i>Sign Out
+                                </a>
                             </div>
-                            <a href="{{ url_for('dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                                <i class="ri-dashboard-line mr-2"></i>Dashboard
-                            </a>
-                            <a href="{{ url_for('setting') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                                <i class="ri-settings-line mr-2"></i>Settings
-                            </a>
-                            <hr class="my-1">
-                            <a href="{{ url_for('logout') }}" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
-                                <i class="ri-logout-box-line mr-2"></i>Sign Out
-                            </a>
                         </div>
                     </div>
-                </div>
             </header>
             <!-- Main Dashboard Content -->
             <main class="flex-1 overflow-y-auto p-6">
@@ -543,25 +548,23 @@
                                     <h3 class="font-semibold text-gray-800 mb-4">Weekly Insights</h3>
                                     <div id="insightsChart" class="h-48"></div>
                                 </div>
-                                <!-- Mood Tracker Quick Access -->
-                                <div class="bg-white rounded-2xl p-6 shadow-sm">
-                                    <h3 class="font-semibold text-gray-800 mb-4">How are you feeling today?</h3>
-                                    <div class="flex justify-between items-center mb-4">
-                                        <span class="mood-emoji cursor-pointer text-2xl" data-mood="1">😢</span>
-                                        <span class="mood-emoji cursor-pointer text-2xl" data-mood="2">😕</span>
-                                        <span class="mood-emoji cursor-pointer text-2xl" data-mood="3">😐</span>
-                                        <span class="mood-emoji cursor-pointer text-2xl" data-mood="4">🙂</span>
-                                        <span class="mood-emoji cursor-pointer text-2xl selected"
-                                            data-mood="5">😊</span>
-                                    </div>
-                                    <textarea class="w-full p-3 border border-gray-200 rounded-lg text-sm resize-none"
-                                        rows="3" placeholder="How was your day? (optional)"></textarea>
-                                    <button
-                                        class="mt-3 bg-primary text-white px-4 py-2 rounded-button !rounded-button whitespace-nowrap text-sm">Save
-                                        Entry</button>
-                                </div>
                             </div>
                         </div>
+                    </div> <br>
+                    <div class="bg-white rounded-2xl p-6 shadow-sm">
+                        <h3 class="font-semibold text-gray-800 mb-4">How are you feeling today?</h3>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="mood-emoji cursor-pointer text-2xl" data-mood="1">😢</span>
+                            <span class="mood-emoji cursor-pointer text-2xl" data-mood="2">😕</span>
+                            <span class="mood-emoji cursor-pointer text-2xl" data-mood="3">😐</span>
+                            <span class="mood-emoji cursor-pointer text-2xl" data-mood="4">🙂</span>
+                            <span class="mood-emoji cursor-pointer text-2xl selected" data-mood="5">😊</span>
+                        </div>
+                        <textarea class="w-full p-3 border border-gray-200 rounded-lg text-sm resize-none" rows="3"
+                            placeholder="How was your day? (optional)"></textarea>
+                        <button
+                            class="mt-3 bg-primary text-white px-4 py-2 rounded-button !rounded-button whitespace-nowrap text-sm">Save
+                            Entry</button>
                     </div>
                     <!-- Achievements & Gamification -->
                     <div class="mt-8">
@@ -606,7 +609,7 @@
             const sidebarToggle = document.getElementById('sidebarToggle');
             const sidebar = document.getElementById('sidebar');
             const sidebarTexts = document.querySelectorAll('.sidebar-text');
-            
+
             sidebarToggle.addEventListener('click', function () {
                 sidebar.classList.toggle('sidebar-collapsed');
                 sidebar.classList.toggle('sidebar-expanded');
@@ -624,22 +627,22 @@
             // User Dropdown Toggle
             const userMenuButton = document.getElementById('userMenuButton');
             const userDropdown = document.getElementById('userDropdown');
-            
+
             if (userMenuButton && userDropdown) {
-                userMenuButton.addEventListener('click', function(e) {
+                userMenuButton.addEventListener('click', function (e) {
                     e.stopPropagation();
                     userDropdown.classList.toggle('show');
                 });
 
                 // Close dropdown when clicking outside
-                document.addEventListener('click', function(e) {
+                document.addEventListener('click', function (e) {
                     if (!userMenuButton.contains(e.target) && !userDropdown.contains(e.target)) {
                         userDropdown.classList.remove('show');
                     }
                 });
 
                 // Close dropdown when pressing Escape
-                document.addEventListener('keydown', function(e) {
+                document.addEventListener('keydown', function (e) {
                     if (e.key === 'Escape') {
                         userDropdown.classList.remove('show');
                     }
@@ -651,7 +654,7 @@
             const waterButton = document.querySelector('.habit-card:last-of-type button');
             const waterCount = document.querySelector('.habit-card:last-of-type .text-sm.font-semibold');
             const waterProgress = document.querySelector('.habit-card:last-of-type .bg-orange-500');
-            
+
             checkboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', function () {
                     const habitCard = this.closest('.habit-card');
@@ -754,4 +757,4 @@
     </script>
 </body>
 
-</html> 
+</html>

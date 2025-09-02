@@ -35,12 +35,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        :where([class^="ri-"])::before {
-            content: "\f3c2";
-        }
-
         body {
             font-family: 'Poppins', sans-serif;
         }
@@ -81,20 +77,20 @@
                             {{ initial }}
                         </button>
                         <!-- Dropdown Menu -->
-                        <div id="userDropdown" class="user-dropdown absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1">
+                        <div id="userDropdown" class="user-dropdown absolute right-0 mt-2 w-54 bg-white rounded-lg shadow-lg border border-gray-100 py-1">
                             <div class="px-4 py-2 border-b border-gray-100">
                                 <p class="text-sm font-medium text-gray-900">{{ user_name }}</p>
                                 <p class="text-xs text-gray-500">{{ user_email }}</p>
                             </div>
                             <a href="{{ url_for('dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                                <i class="ri-dashboard-line mr-2"></i>Dashboard
+                                <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
                             </a>
                             <a href="{{ url_for('setting') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                                <i class="ri-settings-line mr-2"></i>Settings
+                                <i class="fas fa-cog mr-2"></i>Settings
                             </a>
                             <hr class="my-1">
                             <a href="{{ url_for('logout') }}" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
-                                <i class="ri-logout-box-line mr-2"></i>Sign Out
+                                <i class="fas fa-sign-out-alt mr-2"></i>Sign Out
                             </a>
                         </div>
                     </div>
@@ -178,7 +174,7 @@
                 <div
                     class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 hover:transform hover:-translate-y-2">
                     <div class="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
-                        <i class="ri-checkbox-circle-line text-2xl text-primary"></i>
+                        <i class="fas fa-check-circle text-2xl text-primary"></i>
                     </div>
                     <h3 class="text-xl font-semibold text-gray-900 mb-3">Habit Tracking Made Easy</h3>
                     <p class="text-gray-600">Simple daily check-ins that take seconds. Build streaks and watch your
@@ -187,7 +183,7 @@
                 <div
                     class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 hover:transform hover:-translate-y-2">
                     <div class="w-16 h-16 bg-secondary/10 rounded-xl flex items-center justify-center mb-6">
-                        <i class="ri-heart-pulse-line text-2xl text-secondary"></i>
+                        <i class="fas fa-heart text-2xl text-secondary"></i>
                     </div>
                     <h3 class="text-xl font-semibold text-gray-900 mb-3">Daily Mood Check-ins</h3>
                     <p class="text-gray-600">Track your emotional wellbeing with quick mood logs and private journaling
@@ -196,7 +192,7 @@
                 <div
                     class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 hover:transform hover:-translate-y-2">
                     <div class="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
-                        <i class="ri-robot-line text-2xl text-primary"></i>
+                        <i class="fas fa-robot text-2xl text-primary"></i>
                     </div>
                     <h3 class="text-xl font-semibold text-gray-900 mb-3">AI Wellness Coach</h3>
                     <p class="text-gray-600">Get personalized tips and gentle reminders from your AI coach, tailored to
@@ -205,7 +201,7 @@
                 <div
                     class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 hover:transform hover:-translate-y-2">
                     <div class="w-16 h-16 bg-secondary/10 rounded-xl flex items-center justify-center mb-6">
-                        <i class="ri-line-chart-line text-2xl text-secondary"></i>
+                        <i class="fas fa-chart-line text-2xl text-secondary"></i>
                     </div>
                     <h3 class="text-xl font-semibold text-gray-900 mb-3">Progress Insights</h3>
                     <p class="text-gray-600">Beautiful charts and streak counters that celebrate your wins and keep you
@@ -233,7 +229,7 @@
                         alt="Set Habits" class="w-full max-w-xs mx-auto rounded-lg shadow-sm">
                 </div>
                 <div class="hidden lg:block">
-                    <i class="ri-arrow-right-line text-4xl text-gray-300"></i>
+                    <i class="fas fa-arrow-right text-4xl text-gray-300"></i>
                 </div>
                 <div class="flex-1 text-center">
                     <div
@@ -246,7 +242,7 @@
                         alt="Daily Check-in" class="w-full max-w-xs mx-auto rounded-lg shadow-sm">
                 </div>
                 <div class="hidden lg:block">
-                    <i class="ri-arrow-right-line text-4xl text-gray-300"></i>
+                    <i class="fas fa-arrow-right text-4xl text-gray-300"></i>
                 </div>
                 <div class="flex-1 text-center">
                     <div
@@ -323,26 +319,35 @@
                             class="text-lg font-normal text-gray-600">/month</span></p>
                     <ul class="space-y-3 mb-8">
                         <li class="flex items-center">
-                            <i class="ri-check-line text-primary mr-3"></i>
+                            <i class="fas fa-check text-primary mr-3"></i>
                             <span class="text-gray-700">Track up to 3 habits</span>
                         </li>
                         <li class="flex items-center">
-                            <i class="ri-check-line text-primary mr-3"></i>
+                            <i class="fas fa-check text-primary mr-3"></i>
                             <span class="text-gray-700">Daily mood check-ins</span>
                         </li>
                         <li class="flex items-center">
-                            <i class="ri-check-line text-primary mr-3"></i>
+                            <i class="fas fa-check text-primary mr-3"></i>
                             <span class="text-gray-700">Basic progress tracking</span>
                         </li>
                         <li class="flex items-center">
-                            <i class="ri-check-line text-primary mr-3"></i>
+                            <i class="fas fa-check text-primary mr-3"></i>
                             <span class="text-gray-700">Weekly AI insights</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-times text-gray-400 mr-3"></i>
+                            <span class="text-gray-700">Export your data</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-times text-gray-400 mr-3"></i>
+                            <span class="text-gray-700">Priority support</span>
                         </li>
                     </ul>
                     <button
                         class="w-full border-2 border-primary text-primary py-3 !rounded-button font-semibold hover:bg-primary hover:text-white transition-colors whitespace-nowrap">
                         <a href="{{url_for('signup_page')}}">Get Started Free</a>
                     </button>
+                    <br>
                 </div>
                 <div class="bg-primary p-8 rounded-2xl text-white relative">
                     <div
@@ -354,27 +359,27 @@
                     </p>
                     <ul class="space-y-3 mb-8">
                         <li class="flex items-center">
-                            <i class="ri-check-line text-white mr-3"></i>
+                            <i class="fas fa-check text-white mr-3"></i>
                             <span>Unlimited habit tracking</span>
                         </li>
                         <li class="flex items-center">
-                            <i class="ri-check-line text-white mr-3"></i>
+                            <i class="fas fa-check text-white mr-3"></i>
                             <span>Advanced mood analytics</span>
                         </li>
                         <li class="flex items-center">
-                            <i class="ri-check-line text-white mr-3"></i>
+                            <i class="fas fa-check text-white mr-3"></i>
                             <span>Daily AI coaching</span>
                         </li>
                         <li class="flex items-center">
-                            <i class="ri-check-line text-white mr-3"></i>
+                            <i class="fas fa-check text-white mr-3"></i>
                             <span>Custom habit templates</span>
                         </li>
                         <li class="flex items-center">
-                            <i class="ri-check-line text-white mr-3"></i>
+                            <i class="fas fa-check text-white mr-3"></i>
                             <span>Export your data</span>
                         </li>
                         <li class="flex items-center">
-                            <i class="ri-check-line text-white mr-3"></i>
+                            <i class="fas fa-check text-white mr-3"></i>
                             <span>Priority support</span>
                         </li>
                     </ul>
@@ -397,7 +402,7 @@
                 <div class="bg-white rounded-lg shadow-sm">
                     <button class="w-full p-6 text-left flex items-center justify-between faq-toggle">
                         <span class="text-lg font-semibold text-gray-900">How does the AI wellness coach work?</span>
-                        <i class="ri-add-line text-2xl text-gray-400 transition-transform faq-icon"></i>
+                        <i class="fas fa-plus text-2xl text-gray-400 transition-transform faq-icon"></i>
                     </button>
                     <div class="faq-content hidden px-6 pb-6">
                         <p class="text-gray-600">Our AI coach analyzes your habit patterns, mood trends, and personal
@@ -408,7 +413,7 @@
                 <div class="bg-white rounded-lg shadow-sm">
                     <button class="w-full p-6 text-left flex items-center justify-between faq-toggle">
                         <span class="text-lg font-semibold text-gray-900">Is my data private and secure?</span>
-                        <i class="ri-add-line text-2xl text-gray-400 transition-transform faq-icon"></i>
+                        <i class="fas fa-plus text-2xl text-gray-400 transition-transform faq-icon"></i>
                     </button>
                     <div class="faq-content hidden px-6 pb-6">
                         <p class="text-gray-600">Absolutely. We use end-to-end encryption to protect your personal data.
@@ -420,7 +425,7 @@
                     <button class="w-full p-6 text-left flex items-center justify-between faq-toggle">
                         <span class="text-lg font-semibold text-gray-900">Can I cancel my premium subscription
                             anytime?</span>
-                        <i class="ri-add-line text-2xl text-gray-400 transition-transform faq-icon"></i>
+                        <i class="fas fa-plus text-2xl text-gray-400 transition-transform faq-icon"></i>
                     </button>
                     <div class="faq-content hidden px-6 pb-6">
                         <p class="text-gray-600">Yes, you can cancel your premium subscription at any time with no
@@ -431,7 +436,7 @@
                 <div class="bg-white rounded-lg shadow-sm">
                     <button class="w-full p-6 text-left flex items-center justify-between faq-toggle">
                         <span class="text-lg font-semibold text-gray-900">Do you offer a mobile app?</span>
-                        <i class="ri-add-line text-2xl text-gray-400 transition-transform faq-icon"></i>
+                        <i class="fas fa-plus text-2xl text-gray-400 transition-transform faq-icon"></i>
                     </button>
                     <div class="faq-content hidden px-6 pb-6">
                         <p class="text-gray-600">Yes! Wellnest is available on both iOS and Android. You can sync your
@@ -464,19 +469,19 @@
                     <div class="flex space-x-4">    
                         <a href="#"
                             class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-colors">
-                            <i class="ri-twitter-x-line"></i>
+                            <i class="fab fa-x-twitter"></i>
                         </a>
                         <a href="#"
                             class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-colors">
-                            <i class="ri-facebook-fill"></i>
+                            <i class="fab fa-facebook-f"></i>
                         </a>
                         <a href="#"
                             class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-colors">
-                            <i class="ri-instagram-line"></i>
+                            <i class="fab fa-instagram"></i>
                         </a>
                         <a href="#"
                             class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-colors">
-                            <i class="ri-linkedin-fill"></i>
+                            <i class="fab fa-linkedin-in"></i>
                         </a>
                     </div>
                 </div>
@@ -503,7 +508,7 @@
                     <div class="space-y-3">
                         <a href="#"
                             class="flex items-center bg-gray-800 p-3 rounded-lg hover:bg-gray-700 transition-colors">
-                            <i class="ri-apple-fill text-2xl mr-3"></i>
+                            <i class="fab fa-apple text-2xl mr-3"></i>
                             <div>
                                 <p class="text-xs text-gray-400">Download on the</p>
                                 <p class="font-semibold">App Store</p>
@@ -511,7 +516,7 @@
                         </a>
                         <a href="#"
                             class="flex items-center bg-gray-800 p-3 rounded-lg hover:bg-gray-700 transition-colors">
-                            <i class="ri-google-play-fill text-2xl mr-3"></i>
+                            <i class="fab fa-google-play text-2xl mr-3"></i>
                             <div>
                                 <p class="text-xs text-gray-400">Get it on</p>
                                 <p class="font-semibold">Google Play</p>
