@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>To-Do Page</title>
 </head>
+
 <body>
   <h1>Add To-Do Item</h1>
   <form id="todoForm">
+    <label>Item ID:</label><br>
+    <input type="number" name="itemId" required><br><br>
     <label>Item Name:</label><br>
     <input type="text" name="itemName" required><br><br>
 
@@ -28,7 +32,7 @@
 
       const res = await fetch("/submittodoitem", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
       });
 
@@ -37,4 +41,5 @@
     });
   </script>
 </body>
-</html>git add public/todo.html
+
+</html>
